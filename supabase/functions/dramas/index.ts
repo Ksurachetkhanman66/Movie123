@@ -25,12 +25,28 @@ serve(async (req: Request) => {
     const featured = url.searchParams.get('featured');
     const limit = url.searchParams.get('limit');
 
-    if (req.method === 'GET') {
+    if (req.method === 'GET' || req.method === 'POST') {
+      // For POST requests, get params from body
+      let bodyParams: Record<string, string> = {};
+      if (req.method === 'POST') {
+        try {
+          bodyParams = await req.json();
+        } catch {
+          bodyParams = {};
+        }
+      }
+
+      const finalId = id || bodyParams.id;
+      const finalSection = section || bodyParams.section;
+      const finalCategory = category || bodyParams.category;
+      const finalFeatured = featured || bodyParams.featured;
+      const finalLimit = limit || bodyParams.limit;
+
       let query = supabaseClient.from('dramas').select('*');
 
       // Filter by specific ID
-      if (id) {
-        const { data, error } = await query.eq('id', id).maybeSingle();
+      if (finalId) {
+        const { data, error } = await query.eq('id', finalId).maybeSingle();
         
         if (error) {
           console.error('Error fetching drama by id:', error);
@@ -54,23 +70,23 @@ serve(async (req: Request) => {
       }
 
       // Filter by section
-      if (section) {
-        query = query.eq('section', section);
+      if (finalSection) {
+        query = query.eq('section', finalSection);
       }
 
       // Filter by featured
-      if (featured === 'true') {
+      if (finalFeatured === 'true') {
         query = query.eq('is_featured', true);
       }
 
       // Filter by category
-      if (category) {
-        query = query.contains('category', [category]);
+      if (finalCategory) {
+        query = query.contains('category', [finalCategory]);
       }
 
       // Apply limit
-      if (limit) {
-        query = query.limit(parseInt(limit));
+      if (finalLimit) {
+        query = query.limit(parseInt(finalLimit));
       }
 
       // Order by view_count descending
