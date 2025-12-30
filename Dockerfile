@@ -10,11 +10,12 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci && npm cache clean --force
 
-# Copy source files and build with MySQL mode
+# Copy source files
 COPY . .
 ENV VITE_API_URL=${VITE_API_URL}
-ENV VITE_USE_MYSQL=true
-RUN npm run build
+
+# Use MySQL entry point for Docker build
+RUN cp src/main-mysql.tsx src/main.tsx && npm run build
 
 # ---------- Stage 2: Production runtime with Nginx ----------
 FROM nginx:alpine AS runner
