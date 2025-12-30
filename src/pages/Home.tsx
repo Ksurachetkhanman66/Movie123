@@ -23,7 +23,7 @@ interface Drama {
   is_featured: boolean;
 }
 
-const CATEGORIES = ['โรแมนติก', 'ดราม่า', 'แอคชั่น', 'ย้อนยุค', 'ตลก', 'แฟนตาซี', 'ลึกลับ', 'สยองขวัญ'];
+const CATEGORIES = ['โรแมนติก', 'ดราม่า', 'แอคชั่น', 'ย้อนยุค', 'แฟนตาซี'];
 
 const Home = () => {
   const { user, signOut } = useAuth();
