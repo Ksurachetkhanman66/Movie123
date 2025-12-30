@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.dramas]
 verify_jwt = false
+
+[functions.episodes]
+verify_jwt = false

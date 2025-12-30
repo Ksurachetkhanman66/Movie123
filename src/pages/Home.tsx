@@ -66,7 +66,7 @@ const Home = () => {
   };
 
   const DramaCard = ({ drama }: { drama: Drama }) => (
-    <div className="group cursor-pointer transition-all duration-300 hover:scale-105">
+    <Link to={`/drama/${drama.id}`} className="group cursor-pointer transition-all duration-300 hover:scale-105 block">
       <div className="relative aspect-[2/3] overflow-hidden rounded-lg">
         <img
           src={drama.poster_url}
@@ -101,7 +101,7 @@ const Home = () => {
           ))}
         </div>
       </div>
-    </div>
+    </Link>
   );
 
   const SectionHeader = ({ title, showMore = true }: { title: string; showMore?: boolean }) => (
