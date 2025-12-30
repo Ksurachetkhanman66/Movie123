@@ -51,30 +51,23 @@ pipeline {
                 script {
                     echo "Preparing environment configuration..."
 
-                    // Load credentials from Jenkins
-                    withCredentials([
-                        string(credentialsId: 'MYSQL_ROOT_PASSWORD', variable: 'MYSQL_ROOT_PASS'),
-                        string(credentialsId: 'MYSQL_PASSWORD', variable: 'MYSQL_PASS'),
-                        string(credentialsId: 'SESSION_SECRET', variable: 'SESSION_SEC')
-                    ]) {
-                        // Create .env file
-                        sh """
-                            cat > .env <<EOF
-MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASS}
+                    // Create .env file with predefined values
+                    sh """
+                        cat > .env <<EOF
+MYSQL_ROOT_PASSWORD=rootpassword
 MYSQL_DATABASE=drama_streaming
 MYSQL_USER=drama_user
-MYSQL_PASSWORD=${MYSQL_PASS}
+MYSQL_PASSWORD=drama_pass
 MYSQL_PORT=3306
 PHPMYADMIN_PORT=8888
 API_PORT=3001
-SESSION_SECRET=${SESSION_SEC}
+SESSION_SECRET=your-super-secret-session-key-change-this
 CORS_ORIGIN=http://localhost:3000
 FRONTEND_PORT=3000
 NODE_ENV=production
 VITE_API_URL=${params.VITE_API_URL}
 EOF
-                        """
-                    }
+                    """
 
                     echo "Environment configuration created"
                     sh 'echo ".env file created successfully"'
