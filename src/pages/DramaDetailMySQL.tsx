@@ -223,14 +223,17 @@ const DramaDetail = () => {
                 <ChevronLeft className="h-5 w-5" />
               </Button>
             </Link>
-            <div className="flex items-center gap-2">
-              <div className="bg-gradient-to-r from-red-500 to-pink-500 rounded-lg p-2">
-                <Play className="h-4 w-4 text-white fill-white" />
-              </div>
-              <span className="text-lg font-bold bg-gradient-to-r from-red-500 to-pink-500 bg-clip-text text-transparent">
-                MovieForU
+            <Link to="/" className="flex items-center gap-1">
+              <span className="text-xl font-extrabold bg-gradient-to-r from-red-500 via-pink-500 to-orange-400 bg-clip-text text-transparent tracking-tight">
+                Movie
               </span>
-            </div>
+              <span className="text-xl font-extrabold text-foreground tracking-tight">
+                For
+              </span>
+              <span className="text-xl font-extrabold bg-gradient-to-r from-pink-500 to-red-500 bg-clip-text text-transparent tracking-tight">
+                U
+              </span>
+            </Link>
           </div>
         </div>
       </header>
