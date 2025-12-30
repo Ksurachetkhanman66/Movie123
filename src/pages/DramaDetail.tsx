@@ -22,6 +22,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useToast } from '@/hooks/use-toast';
 
 interface Drama {
   id: string;
@@ -54,6 +55,7 @@ interface Episode {
 const DramaDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
+  const { toast } = useToast();
   const videoRef = useRef<HTMLVideoElement>(null);
   
   const [drama, setDrama] = useState<Drama | null>(null);
@@ -62,12 +64,97 @@ const DramaDetail = () => {
   const [loading, setLoading] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [favoriteLoading, setFavoriteLoading] = useState(false);
 
   useEffect(() => {
     if (id) {
       fetchDramaDetails();
     }
   }, [id]);
+
+  useEffect(() => {
+    if (id && user) {
+      checkFavoriteStatus();
+    } else {
+      setIsFavorite(false);
+    }
+  }, [id, user]);
+
+  const checkFavoriteStatus = async () => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/favorites?drama_id=${id}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+          },
+        }
+      );
+      const data = await response.json();
+      setIsFavorite(data?.isFavorite || false);
+    } catch (err) {
+      console.error('Error checking favorite status:', err);
+    }
+  };
+
+  const toggleFavorite = async () => {
+    if (!user) {
+      toast({
+        title: "กรุณาเข้าสู่ระบบ",
+        description: "ต้องเข้าสู่ระบบก่อนเพิ่มรายการโปรด",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setFavoriteLoading(true);
+    try {
+      const session = (await supabase.auth.getSession()).data.session;
+      
+      if (isFavorite) {
+        // Remove from favorites
+        const response = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/favorites?drama_id=${id}`,
+          {
+            method: 'DELETE',
+            headers: {
+              'Authorization': `Bearer ${session?.access_token}`,
+            },
+          }
+        );
+        if (response.ok) {
+          setIsFavorite(false);
+          toast({ title: "ลบออกจากรายการโปรดแล้ว" });
+        }
+      } else {
+        // Add to favorites
+        const response = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/favorites`,
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${session?.access_token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ drama_id: id }),
+          }
+        );
+        if (response.ok) {
+          setIsFavorite(true);
+          toast({ title: "เพิ่มในรายการโปรดแล้ว" });
+        }
+      }
+    } catch (err) {
+      console.error('Error toggling favorite:', err);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถดำเนินการได้",
+        variant: "destructive"
+      });
+    } finally {
+      setFavoriteLoading(false);
+    }
+  };
 
   const fetchDramaDetails = async () => {
     try {
@@ -330,7 +417,8 @@ const DramaDetail = () => {
                 <Button 
                   variant="outline" 
                   className="flex-1"
-                  onClick={() => setIsFavorite(!isFavorite)}
+                  onClick={toggleFavorite}
+                  disabled={favoriteLoading}
                 >
                   <Heart className={`h-4 w-4 mr-2 ${isFavorite ? 'fill-red-500 text-red-500' : ''}`} />
                   {isFavorite ? 'ถูกใจแล้ว' : 'ถูกใจ'}
