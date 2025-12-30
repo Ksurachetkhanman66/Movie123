@@ -2,3 +2,6 @@ project_id = "gnjxgtlbkmxwxltemnnw"
 
 [functions.items]
 verify_jwt = false
+
+[functions.dramas]
+verify_jwt = false
