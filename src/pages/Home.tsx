@@ -190,7 +190,7 @@ const Home = () => {
                 <Play className="h-5 w-5 text-white fill-white" />
               </div>
               <span className="text-xl font-bold bg-gradient-to-r from-red-500 to-pink-500 bg-clip-text text-transparent">
-                DramaBox
+                MovieForU
               </span>
             </Link>
 
@@ -546,10 +546,10 @@ const Home = () => {
               <div className="bg-gradient-to-r from-red-500 to-pink-500 rounded-lg p-2">
                 <Play className="h-4 w-4 text-white fill-white" />
               </div>
-              <span className="font-bold text-foreground">DramaBox</span>
+              <span className="font-bold text-foreground">MovieForU</span>
             </div>
             <p className="text-sm text-muted-foreground">
-              © 2024 DramaBox. สงวนลิขสิทธิ์ทั้งหมด
+              © 2024 MovieForU. สงวนลิขสิทธิ์ทั้งหมด
             </p>
           </div>
         </div>

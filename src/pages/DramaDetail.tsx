@@ -276,7 +276,7 @@ const DramaDetail = () => {
                 <Play className="h-4 w-4 text-white fill-white" />
               </div>
               <span className="text-lg font-bold bg-gradient-to-r from-red-500 to-pink-500 bg-clip-text text-transparent">
-                DramaBox
+                MovieForU
               </span>
             </div>
           </div>
