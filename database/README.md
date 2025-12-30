@@ -1,4 +1,4 @@
-# DramaBox Database
+# MovieForU Database
 
 ## ไฟล์ในโฟลเดอร์นี้
 
@@ -32,14 +32,14 @@
 
 ```bash
 # สร้าง database
-createdb dramabox
+createdb movieforu
 
 # รัน schema
-psql -d dramabox -f schema.sql
+psql -d movieforu -f schema.sql
 
 # เพิ่มข้อมูลตัวอย่าง
-psql -d dramabox -f seed_dramas.sql
-psql -d dramabox -f seed_episodes.sql
+psql -d movieforu -f seed_dramas.sql
+psql -d movieforu -f seed_episodes.sql
 ```
 
 ## โครงสร้างตาราง

@@ -1,5 +1,5 @@
 -- =====================================================
--- DramaBox Seed Data - Dramas
+-- MovieForU Seed Data - Dramas
 -- =====================================================
 
 INSERT INTO public.dramas (title, title_en, description, poster_url, episodes, category, section, view_count, rating, year, is_featured) VALUES
