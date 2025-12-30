@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.episodes]
 verify_jwt = false
+
+[functions.favorites]
+verify_jwt = true

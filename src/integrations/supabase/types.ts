@@ -118,6 +118,35 @@ export type Database = {
           },
         ]
       }
+      favorites: {
+        Row: {
+          created_at: string
+          drama_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          drama_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          drama_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "favorites_drama_id_fkey"
+            columns: ["drama_id"]
+            isOneToOne: false
+            referencedRelation: "dramas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       items: {
         Row: {
           category: string | null

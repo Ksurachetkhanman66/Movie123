@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, Play, Star, ChevronRight, User, Menu, X } from 'lucide-react';
+import { Search, Play, Star, ChevronRight, User, Menu, X, Heart } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -162,6 +162,10 @@ const Home = () => {
             <nav className="hidden md:flex items-center gap-6">
               <Link to="/" className="text-foreground font-medium hover:text-primary transition-colors">
                 หน้าแรก
+              </Link>
+              <Link to="/favorites" className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-1">
+                <Heart className="h-4 w-4" />
+                รายการโปรด
               </Link>
             </nav>
 
