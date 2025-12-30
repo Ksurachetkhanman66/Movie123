@@ -65,6 +65,59 @@ export type Database = {
         }
         Relationships: []
       }
+      episodes: {
+        Row: {
+          created_at: string
+          description: string | null
+          drama_id: string
+          duration: number | null
+          episode_number: number
+          id: string
+          is_free: boolean | null
+          thumbnail_url: string | null
+          title: string
+          updated_at: string
+          video_url: string | null
+          view_count: number | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          drama_id: string
+          duration?: number | null
+          episode_number: number
+          id?: string
+          is_free?: boolean | null
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string
+          video_url?: string | null
+          view_count?: number | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          drama_id?: string
+          duration?: number | null
+          episode_number?: number
+          id?: string
+          is_free?: boolean | null
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string
+          video_url?: string | null
+          view_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "episodes_drama_id_fkey"
+            columns: ["drama_id"]
+            isOneToOne: false
+            referencedRelation: "dramas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       items: {
         Row: {
           category: string | null
