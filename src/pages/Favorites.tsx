@@ -45,7 +45,9 @@ const Favorites = () => {
   const fetchFavorites = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase.functions.invoke('favorites');
+      const { data, error } = await supabase.functions.invoke('favorites', {
+        body: { action: 'LIST' }
+      });
       
       if (error) throw error;
       
@@ -65,23 +67,10 @@ const Favorites = () => {
   const removeFavorite = async (dramaId: string) => {
     try {
       const { error } = await supabase.functions.invoke('favorites', {
-        method: 'DELETE',
-        body: null,
+        body: { action: 'REMOVE', drama_id: dramaId }
       });
-      
-      // Use query params for DELETE
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/favorites?drama_id=${dramaId}`,
-        {
-          method: 'DELETE',
-          headers: {
-            'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
 
-      if (!response.ok) throw new Error('Failed to remove favorite');
+      if (error) throw new Error('Failed to remove favorite');
 
       setFavorites(prev => prev.filter(f => f.drama_id !== dramaId));
       toast({

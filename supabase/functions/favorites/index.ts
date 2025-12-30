@@ -39,29 +39,47 @@ serve(async (req: Request) => {
     }
 
     const url = new URL(req.url);
+    
+    // Parse body for POST requests (supabase.functions.invoke always sends POST)
+    let bodyParams: Record<string, string> = {};
+    if (req.method === 'POST') {
+      try {
+        bodyParams = await req.json();
+      } catch {
+        bodyParams = {};
+      }
+    }
 
-    // GET - Fetch user's favorites with drama details
-    if (req.method === 'GET') {
-      const dramaId = url.searchParams.get('drama_id');
+    // Determine action based on body.action or method
+    const action = bodyParams.action || req.method;
+    const dramaId = url.searchParams.get('drama_id') || bodyParams.drama_id;
 
-      // Check if specific drama is favorited
-      if (dramaId) {
-        const { data, error } = await supabaseClient
-          .from('favorites')
-          .select('id')
-          .eq('user_id', user.id)
-          .eq('drama_id', dramaId)
-          .maybeSingle();
-
-        if (error) throw error;
-
+    // CHECK - Check if specific drama is favorited
+    if (action === 'CHECK' || (action === 'GET' && dramaId)) {
+      if (!dramaId) {
         return new Response(
-          JSON.stringify({ success: true, isFavorite: !!data }),
-          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          JSON.stringify({ success: false, error: 'drama_id is required' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
 
-      // Get all favorites with drama details
+      const { data, error } = await supabaseClient
+        .from('favorites')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('drama_id', dramaId)
+        .maybeSingle();
+
+      if (error) throw error;
+
+      return new Response(
+        JSON.stringify({ success: true, isFavorite: !!data }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // LIST - Get all favorites with drama details
+    if (action === 'GET' || action === 'LIST') {
       const { data, error } = await supabaseClient
         .from('favorites')
         .select('id, drama_id, created_at, dramas(*)')
@@ -78,11 +96,8 @@ serve(async (req: Request) => {
       );
     }
 
-    // POST - Add to favorites
-    if (req.method === 'POST') {
-      const body = await req.json();
-      const dramaId = body.drama_id;
-
+    // ADD - Add to favorites
+    if (action === 'POST' || action === 'ADD') {
       if (!dramaId) {
         return new Response(
           JSON.stringify({ success: false, error: 'drama_id is required' }),
@@ -115,10 +130,8 @@ serve(async (req: Request) => {
       );
     }
 
-    // DELETE - Remove from favorites
-    if (req.method === 'DELETE') {
-      const dramaId = url.searchParams.get('drama_id');
-
+    // REMOVE - Remove from favorites
+    if (action === 'DELETE' || action === 'REMOVE') {
       if (!dramaId) {
         return new Response(
           JSON.stringify({ success: false, error: 'drama_id is required' }),
@@ -143,8 +156,8 @@ serve(async (req: Request) => {
     }
 
     return new Response(
-      JSON.stringify({ success: false, error: 'Method not allowed' }),
-      { status: 405, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({ success: false, error: 'Invalid action' }),
+      { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
   } catch (error: unknown) {
