@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, Play, Star, ChevronRight, User, Menu } from 'lucide-react';
+import { Search, Play, Star, ChevronRight, User, Menu, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -23,9 +23,13 @@ interface Drama {
   is_featured: boolean;
 }
 
+const CATEGORIES = ['โรแมนติก', 'ดราม่า', 'แอคชั่น', 'ย้อนยุค', 'ตลก', 'แฟนตาซี', 'ลึกลับ', 'สยองขวัญ'];
+
 const Home = () => {
   const { user, signOut } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [allDramas, setAllDramas] = useState<Drama[]>([]);
   const [featuredDramas, setFeaturedDramas] = useState<Drama[]>([]);
   const [trendingDramas, setTrendingDramas] = useState<Drama[]>([]);
   const [mustSeeDramas, setMustSeeDramas] = useState<Drama[]>([]);
@@ -46,13 +50,14 @@ const Home = () => {
       
       if (error) throw error;
       
-      const allDramas: Drama[] = data?.data || [];
+      const dramas: Drama[] = data?.data || [];
+      setAllDramas(dramas);
       
       // Categorize dramas
-      setFeaturedDramas(allDramas.filter(d => d.is_featured).slice(0, 3));
-      setTrendingDramas(allDramas.filter(d => d.section === 'trending').slice(0, 6));
-      setMustSeeDramas(allDramas.filter(d => d.section === 'must-see').slice(0, 6));
-      setHiddenGemsDramas(allDramas.filter(d => d.section === 'hidden-gems').slice(0, 6));
+      setFeaturedDramas(dramas.filter(d => d.is_featured).slice(0, 3));
+      setTrendingDramas(dramas.filter(d => d.section === 'trending').slice(0, 6));
+      setMustSeeDramas(dramas.filter(d => d.section === 'must-see').slice(0, 6));
+      setHiddenGemsDramas(dramas.filter(d => d.section === 'hidden-gems').slice(0, 6));
       
     } catch (err) {
       console.error('Error fetching dramas:', err);
@@ -60,6 +65,20 @@ const Home = () => {
       setLoading(false);
     }
   };
+
+  // Filter dramas based on search and category
+  const filteredDramas = allDramas.filter(drama => {
+    const matchesSearch = searchQuery.trim() === '' || 
+      drama.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (drama.title_en && drama.title_en.toLowerCase().includes(searchQuery.toLowerCase()));
+    
+    const matchesCategory = !selectedCategory || 
+      (drama.category && drama.category.includes(selectedCategory));
+    
+    return matchesSearch && matchesCategory;
+  });
+
+  const isSearching = searchQuery.trim() !== '' || selectedCategory !== null;
 
   const handleSignOut = async () => {
     await signOut();
@@ -186,6 +205,73 @@ const Home = () => {
       </header>
 
       <main className="container mx-auto px-4 py-8">
+        {/* Category Filter */}
+        <section className="mb-6">
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              variant={selectedCategory === null ? "default" : "outline"}
+              size="sm"
+              onClick={() => setSelectedCategory(null)}
+              className={selectedCategory === null ? "bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600" : ""}
+            >
+              ทั้งหมด
+            </Button>
+            {CATEGORIES.map(category => (
+              <Button
+                key={category}
+                variant={selectedCategory === category ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSelectedCategory(selectedCategory === category ? null : category)}
+                className={selectedCategory === category ? "bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600" : ""}
+              >
+                {category}
+              </Button>
+            ))}
+          </div>
+        </section>
+
+        {/* Search Results or Home Content */}
+        {isSearching ? (
+          <section className="mb-12">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <h2 className="text-xl md:text-2xl font-bold text-foreground">
+                  ผลการค้นหา
+                </h2>
+                <Badge variant="secondary" className="text-sm">
+                  {filteredDramas.length} เรื่อง
+                </Badge>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setSearchQuery('');
+                  setSelectedCategory(null);
+                }}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-4 w-4 mr-1" />
+                ล้างการค้นหา
+              </Button>
+            </div>
+
+            {filteredDramas.length === 0 ? (
+              <div className="text-center py-16">
+                <div className="text-6xl mb-4">🔍</div>
+                <h3 className="text-xl font-semibold text-foreground mb-2">ไม่พบละครที่ค้นหา</h3>
+                <p className="text-muted-foreground">ลองค้นหาด้วยคำอื่น หรือเลือกหมวดหมู่อื่น</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                {filteredDramas.map(drama => (
+                  <DramaCard key={drama.id} drama={drama} />
+                ))}
+              </div>
+            )}
+          </section>
+        ) : (
+          <>
         {/* Hero / Featured Section */}
         {!loading && featuredDramas.length > 0 && (
           <section className="mb-12">
@@ -330,6 +416,8 @@ const Home = () => {
             </div>
           )}
         </section>
+        </>
+        )}
       </main>
 
       {/* Footer */}
