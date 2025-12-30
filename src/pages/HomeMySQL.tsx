@@ -490,9 +490,6 @@ const Home = () => {
                 MovieForU
               </span>
             </div>
-            <p className="text-sm text-muted-foreground">
-              © 2024 MovieForU. สงวนลิขสิทธิ์ทั้งหมด
-            </p>
           </div>
         </div>
       </footer>

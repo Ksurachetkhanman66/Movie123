@@ -534,9 +534,6 @@ const Home = () => {
               </div>
               <span className="font-bold bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent">MovieForU</span>
             </div>
-            <p className="text-sm text-muted-foreground">
-              © 2024 MovieForU. สงวนลิขสิทธิ์ทั้งหมด
-            </p>
           </div>
         </div>
       </footer>
