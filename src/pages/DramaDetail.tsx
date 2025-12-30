@@ -73,26 +73,30 @@ const DramaDetail = () => {
   }, [id]);
 
   useEffect(() => {
-    if (id && user) {
-      checkFavoriteStatus();
-    } else {
-      setIsFavorite(false);
-    }
-  }, [id, user]);
-
-  const checkFavoriteStatus = async () => {
-    try {
-      const { data, error } = await supabase.functions.invoke('favorites', {
-        body: { action: 'CHECK', drama_id: id }
-      });
-      
-      if (!error && data) {
-        setIsFavorite(data?.isFavorite || false);
+    const checkFavorite = async () => {
+      if (id && user) {
+        // Ensure we have a valid session before calling
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.access_token) {
+          try {
+            const { data, error } = await supabase.functions.invoke('favorites', {
+              body: { action: 'CHECK', drama_id: id }
+            });
+            
+            if (!error && data) {
+              setIsFavorite(data?.isFavorite || false);
+            }
+          } catch (err) {
+            console.error('Error checking favorite status:', err);
+          }
+        }
+      } else {
+        setIsFavorite(false);
       }
-    } catch (err) {
-      console.error('Error checking favorite status:', err);
-    }
-  };
+    };
+    
+    checkFavorite();
+  }, [id, user]);
 
   const toggleFavorite = async () => {
     if (!user) {
