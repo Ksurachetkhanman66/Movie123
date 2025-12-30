@@ -163,9 +163,6 @@ const Home = () => {
               <Link to="/" className="text-foreground font-medium hover:text-primary transition-colors">
                 หน้าแรก
               </Link>
-              <Link to="/items" className="text-muted-foreground hover:text-primary transition-colors">
-                หมวดหมู่
-              </Link>
             </nav>
 
             {/* Search */}
