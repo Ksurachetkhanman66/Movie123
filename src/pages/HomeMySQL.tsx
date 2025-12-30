@@ -18,7 +18,7 @@ const Home = () => {
   const [featuredDramas, setFeaturedDramas] = useState<Drama[]>([]);
   const [trendingDramas, setTrendingDramas] = useState<Drama[]>([]);
   const [mustSeeDramas, setMustSeeDramas] = useState<Drama[]>([]);
-  const [hiddenGemsDramas, setHiddenGemsDramas] = useState<Drama[]>([]);
+  
   const [loading, setLoading] = useState(true);
   const [activeFeatured, setActiveFeatured] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
@@ -77,7 +77,7 @@ const Home = () => {
       setFeaturedDramas(dramas.filter(d => d.is_featured).slice(0, 3));
       setTrendingDramas(dramas.filter(d => d.section === 'trending').slice(0, 6));
       setMustSeeDramas(dramas.filter(d => d.section === 'must-see').slice(0, 6));
-      setHiddenGemsDramas(dramas.filter(d => d.section === 'hidden-gems').slice(0, 6));
+      
       
     } catch (err) {
       console.error('Error fetching dramas:', err);
@@ -462,19 +462,6 @@ const Home = () => {
           </div>
         </section>
 
-        {/* Hidden Gems Section */}
-        <section className="mb-12">
-          <SectionHeader title="💎 อัญมณีซ่อนเร้น" />
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {loading ? (
-              Array(6).fill(0).map((_, idx) => <SkeletonCard key={idx} />)
-            ) : hiddenGemsDramas.length > 0 ? (
-              hiddenGemsDramas.map(drama => <DramaCard key={drama.id} drama={drama} />)
-            ) : (
-              allDramas.slice(12, 18).map(drama => <DramaCard key={drama.id} drama={drama} />)
-            )}
-          </div>
-        </section>
 
         {/* All Dramas Section */}
         <section className="mb-12">
