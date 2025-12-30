@@ -170,13 +170,13 @@ const Home = () => {
           <div className="flex items-center justify-between gap-4">
             {/* Logo */}
             <Link to="/" className="flex items-center gap-1">
-              <span className="text-2xl font-extrabold bg-gradient-to-r from-red-500 via-pink-500 to-orange-400 bg-clip-text text-transparent tracking-tight">
+              <span className="text-2xl font-extrabold bg-gradient-to-r from-amber-500 via-yellow-400 to-orange-500 bg-clip-text text-transparent tracking-tight">
                 Movie
               </span>
               <span className="text-2xl font-extrabold text-foreground tracking-tight">
                 For
               </span>
-              <span className="text-2xl font-extrabold bg-gradient-to-r from-pink-500 to-red-500 bg-clip-text text-transparent tracking-tight">
+              <span className="text-2xl font-extrabold bg-gradient-to-r from-orange-500 to-amber-500 bg-clip-text text-transparent tracking-tight">
                 U
               </span>
             </Link>
@@ -215,7 +215,7 @@ const Home = () => {
                 </Button>
               ) : (
                 <Link to="/auth">
-                  <Button variant="default" size="sm" className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600">
+                  <Button variant="default" size="sm" className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600">
                     เข้าสู่ระบบ
                   </Button>
                 </Link>
@@ -236,7 +236,7 @@ const Home = () => {
               variant={selectedCategory === null ? "default" : "outline"}
               size="sm"
               onClick={() => setSelectedCategory(null)}
-              className={selectedCategory === null ? "bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600" : ""}
+              className={selectedCategory === null ? "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600" : ""}
             >
               ทั้งหมด
             </Button>
@@ -246,7 +246,7 @@ const Home = () => {
                 variant={selectedCategory === category ? "default" : "outline"}
                 size="sm"
                 onClick={() => setSelectedCategory(selectedCategory === category ? null : category)}
-                className={selectedCategory === category ? "bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600" : ""}
+                className={selectedCategory === category ? "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600" : ""}
               >
                 {category}
               </Button>
@@ -332,7 +332,7 @@ const Home = () => {
                 {/* Content */}
                 <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8 z-30">
                   <div className="animate-fade-in" key={activeFeatured}>
-                    <Badge className="bg-red-500 text-white mb-3 animate-scale-in">
+                    <Badge className="bg-amber-500 text-white mb-3 animate-scale-in">
                       แนะนำ
                     </Badge>
                     <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">
@@ -343,7 +343,7 @@ const Home = () => {
                     </p>
                     <div className="flex items-center gap-4">
                       <Link to={`/drama/${featuredDramas[activeFeatured]?.id}`}>
-                        <Button className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 transition-all duration-300 hover:scale-105">
+                        <Button className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 transition-all duration-300 hover:scale-105">
                           <Play className="h-4 w-4 mr-2 fill-white" />
                           ดูเลย
                         </Button>
@@ -496,10 +496,10 @@ const Home = () => {
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
-              <div className="bg-gradient-to-r from-red-500 to-pink-500 rounded-lg p-2">
+              <div className="bg-gradient-to-r from-amber-500 to-orange-500 rounded-lg p-2">
                 <Play className="h-4 w-4 text-white fill-white" />
               </div>
-              <span className="font-bold bg-gradient-to-r from-red-500 to-pink-500 bg-clip-text text-transparent">
+              <span className="font-bold bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent">
                 MovieForU
               </span>
             </div>
