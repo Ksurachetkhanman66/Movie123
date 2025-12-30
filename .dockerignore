@@ -1,0 +1,16 @@
+node_modules
+dist
+.git
+.gitignore
+*.md
+.env
+.env.*
+!.env.docker.example
+Dockerfile
+docker-compose.yml
+Jenkinsfile
+.vscode
+.idea
+*.log
+coverage
+.nyc_output
