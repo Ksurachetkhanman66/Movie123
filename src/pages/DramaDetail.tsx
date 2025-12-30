@@ -82,16 +82,13 @@ const DramaDetail = () => {
 
   const checkFavoriteStatus = async () => {
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/favorites?drama_id=${id}`,
-        {
-          headers: {
-            'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
-          },
-        }
-      );
-      const data = await response.json();
-      setIsFavorite(data?.isFavorite || false);
+      const { data, error } = await supabase.functions.invoke('favorites', {
+        body: { action: 'CHECK', drama_id: id }
+      });
+      
+      if (!error && data) {
+        setIsFavorite(data?.isFavorite || false);
+      }
     } catch (err) {
       console.error('Error checking favorite status:', err);
     }
@@ -109,37 +106,23 @@ const DramaDetail = () => {
 
     setFavoriteLoading(true);
     try {
-      const session = (await supabase.auth.getSession()).data.session;
-      
       if (isFavorite) {
         // Remove from favorites
-        const response = await fetch(
-          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/favorites?drama_id=${id}`,
-          {
-            method: 'DELETE',
-            headers: {
-              'Authorization': `Bearer ${session?.access_token}`,
-            },
-          }
-        );
-        if (response.ok) {
+        const { error } = await supabase.functions.invoke('favorites', {
+          body: { action: 'REMOVE', drama_id: id }
+        });
+        
+        if (!error) {
           setIsFavorite(false);
           toast({ title: "ลบออกจากรายการโปรดแล้ว" });
         }
       } else {
         // Add to favorites
-        const response = await fetch(
-          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/favorites`,
-          {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${session?.access_token}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ drama_id: id }),
-          }
-        );
-        if (response.ok) {
+        const { error } = await supabase.functions.invoke('favorites', {
+          body: { action: 'ADD', drama_id: id }
+        });
+        
+        if (!error) {
           setIsFavorite(true);
           toast({ title: "เพิ่มในรายการโปรดแล้ว" });
         }
