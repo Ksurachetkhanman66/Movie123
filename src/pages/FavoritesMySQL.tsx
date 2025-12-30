@@ -142,7 +142,7 @@ const Favorites = () => {
               </Button>
             </Link>
             <div className="flex items-center gap-2">
-              <Heart className="h-5 w-5 text-red-500 fill-red-500" />
+              <Heart className="h-5 w-5 text-amber-500 fill-amber-500" />
               <h1 className="text-xl font-bold text-foreground">รายการโปรด</h1>
             </div>
           </div>
@@ -162,7 +162,7 @@ const Favorites = () => {
             <h2 className="text-xl font-semibold text-foreground mb-2">ยังไม่มีรายการโปรด</h2>
             <p className="text-muted-foreground mb-6">กดปุ่มหัวใจบนละครที่ชอบเพื่อเพิ่มลงรายการโปรด</p>
             <Link to="/">
-              <Button className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600">
+              <Button className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600">
                 ค้นหาละคร
               </Button>
             </Link>
