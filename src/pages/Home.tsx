@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, Play, Star, ChevronRight, User, Menu, X, Heart } from 'lucide-react';
+import { Search, Play, Star, ChevronRight, User, Menu, X, Heart, ChevronLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -36,6 +36,42 @@ const Home = () => {
   const [hiddenGemsDramas, setHiddenGemsDramas] = useState<Drama[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeFeatured, setActiveFeatured] = useState(0);
+  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+  const [slideDirection, setSlideDirection] = useState<'left' | 'right'>('right');
+
+  // Auto-advance carousel
+  useEffect(() => {
+    if (!isAutoPlaying || featuredDramas.length <= 1) return;
+    
+    const interval = setInterval(() => {
+      setSlideDirection('right');
+      setActiveFeatured(prev => (prev + 1) % featuredDramas.length);
+    }, 5000);
+    
+    return () => clearInterval(interval);
+  }, [isAutoPlaying, featuredDramas.length]);
+
+  const goToSlide = useCallback((index: number) => {
+    setSlideDirection(index > activeFeatured ? 'right' : 'left');
+    setActiveFeatured(index);
+    setIsAutoPlaying(false);
+    // Resume auto-play after 10 seconds of inactivity
+    setTimeout(() => setIsAutoPlaying(true), 10000);
+  }, [activeFeatured]);
+
+  const goToPrevious = useCallback(() => {
+    setSlideDirection('left');
+    setActiveFeatured(prev => (prev - 1 + featuredDramas.length) % featuredDramas.length);
+    setIsAutoPlaying(false);
+    setTimeout(() => setIsAutoPlaying(true), 10000);
+  }, [featuredDramas.length]);
+
+  const goToNext = useCallback(() => {
+    setSlideDirection('right');
+    setActiveFeatured(prev => (prev + 1) % featuredDramas.length);
+    setIsAutoPlaying(false);
+    setTimeout(() => setIsAutoPlaying(true), 10000);
+  }, [featuredDramas.length]);
 
   useEffect(() => {
     fetchDramas();
@@ -277,72 +313,153 @@ const Home = () => {
         {!loading && featuredDramas.length > 0 && (
           <section className="mb-12">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Main Featured */}
-              <div className="lg:col-span-2 relative group cursor-pointer overflow-hidden rounded-2xl">
-                <div className="aspect-[16/9] lg:aspect-[21/9]">
-                  <img
-                    src={featuredDramas[activeFeatured]?.poster_url}
-                    alt={featuredDramas[activeFeatured]?.title}
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
+              {/* Main Featured Carousel */}
+              <div 
+                className="lg:col-span-2 relative group cursor-pointer overflow-hidden rounded-2xl"
+                onMouseEnter={() => setIsAutoPlaying(false)}
+                onMouseLeave={() => setIsAutoPlaying(true)}
+              >
+                {/* Carousel Container */}
+                <div className="relative aspect-[16/9] lg:aspect-[21/9]">
+                  {featuredDramas.map((drama, idx) => (
+                    <div
+                      key={drama.id}
+                      className={`absolute inset-0 transition-all duration-700 ease-in-out ${
+                        idx === activeFeatured 
+                          ? 'opacity-100 scale-100 z-10' 
+                          : 'opacity-0 scale-105 z-0'
+                      }`}
+                    >
+                      <img
+                        src={drama.poster_url}
+                        alt={drama.title}
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                  ))}
                 </div>
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
-                  <Badge className="bg-red-500 text-white mb-3">
-                    แนะนำ
-                  </Badge>
-                  <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">
-                    {featuredDramas[activeFeatured]?.title}
-                  </h1>
-                  <p className="text-white/80 text-sm md:text-base mb-4 line-clamp-2 max-w-xl">
-                    {featuredDramas[activeFeatured]?.description}
-                  </p>
-                  <div className="flex items-center gap-4">
-                    <Button className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600">
-                      <Play className="h-4 w-4 mr-2 fill-white" />
-                      ดูเลย
-                    </Button>
-                    <div className="flex items-center gap-2 text-white/80">
-                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                      <span>{featuredDramas[activeFeatured]?.rating}</span>
-                      <span className="mx-2">•</span>
-                      <span>{featuredDramas[activeFeatured]?.episodes} ตอน</span>
+
+                {/* Gradient Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent z-20" />
+                
+                {/* Content */}
+                <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8 z-30">
+                  <div className="animate-fade-in" key={activeFeatured}>
+                    <Badge className="bg-red-500 text-white mb-3 animate-scale-in">
+                      แนะนำ
+                    </Badge>
+                    <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">
+                      {featuredDramas[activeFeatured]?.title}
+                    </h1>
+                    <p className="text-white/80 text-sm md:text-base mb-4 line-clamp-2 max-w-xl">
+                      {featuredDramas[activeFeatured]?.description}
+                    </p>
+                    <div className="flex items-center gap-4">
+                      <Link to={`/drama/${featuredDramas[activeFeatured]?.id}`}>
+                        <Button className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 transition-all duration-300 hover:scale-105">
+                          <Play className="h-4 w-4 mr-2 fill-white" />
+                          ดูเลย
+                        </Button>
+                      </Link>
+                      <div className="flex items-center gap-2 text-white/80">
+                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                        <span>{featuredDramas[activeFeatured]?.rating}</span>
+                        <span className="mx-2">•</span>
+                        <span>{featuredDramas[activeFeatured]?.episodes} ตอน</span>
+                      </div>
                     </div>
                   </div>
                 </div>
-                {/* Featured Navigation Dots */}
-                <div className="absolute bottom-4 right-4 flex gap-2">
+
+                {/* Navigation Arrows */}
+                <button
+                  onClick={goToPrevious}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 z-30 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110"
+                  aria-label="Previous slide"
+                >
+                  <ChevronLeft className="h-6 w-6" />
+                </button>
+                <button
+                  onClick={goToNext}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 z-30 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110"
+                  aria-label="Next slide"
+                >
+                  <ChevronRight className="h-6 w-6" />
+                </button>
+
+                {/* Progress Dots with Timer */}
+                <div className="absolute bottom-4 right-4 flex gap-2 z-30">
                   {featuredDramas.map((_, idx) => (
                     <button
                       key={idx}
-                      onClick={() => setActiveFeatured(idx)}
-                      className={`w-2 h-2 rounded-full transition-all ${
-                        idx === activeFeatured ? 'bg-white w-6' : 'bg-white/50'
-                      }`}
-                    />
+                      onClick={() => goToSlide(idx)}
+                      className="relative h-2 overflow-hidden rounded-full transition-all duration-300"
+                      style={{ width: idx === activeFeatured ? '24px' : '8px' }}
+                      aria-label={`Go to slide ${idx + 1}`}
+                    >
+                      <span className={`absolute inset-0 ${idx === activeFeatured ? 'bg-white/50' : 'bg-white/30'}`} />
+                      {idx === activeFeatured && isAutoPlaying && (
+                        <span 
+                          className="absolute inset-0 bg-white origin-left"
+                          style={{
+                            animation: 'progress 5s linear forwards'
+                          }}
+                        />
+                      )}
+                      {idx === activeFeatured && !isAutoPlaying && (
+                        <span className="absolute inset-0 bg-white" />
+                      )}
+                    </button>
                   ))}
+                </div>
+
+                {/* Auto-play Indicator */}
+                <div className="absolute top-4 right-4 z-30">
+                  <button
+                    onClick={() => setIsAutoPlaying(!isAutoPlaying)}
+                    className="bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-all duration-300"
+                    aria-label={isAutoPlaying ? 'Pause autoplay' : 'Resume autoplay'}
+                  >
+                    {isAutoPlaying ? (
+                      <div className="flex gap-0.5">
+                        <div className="w-1 h-3 bg-white rounded-sm" />
+                        <div className="w-1 h-3 bg-white rounded-sm" />
+                      </div>
+                    ) : (
+                      <Play className="h-3 w-3 fill-white" />
+                    )}
+                  </button>
                 </div>
               </div>
 
               {/* Side Featured */}
               <div className="hidden lg:flex flex-col gap-4">
-                {featuredDramas.slice(0, 2).map((drama, idx) => (
+                {featuredDramas.slice(0, 3).map((drama, idx) => (
                   <div
                     key={drama.id}
-                    onClick={() => setActiveFeatured(idx)}
-                    className={`flex gap-4 p-3 rounded-xl cursor-pointer transition-all ${
+                    onClick={() => goToSlide(idx)}
+                    className={`flex gap-4 p-3 rounded-xl cursor-pointer transition-all duration-300 hover:scale-[1.02] ${
                       idx === activeFeatured 
-                        ? 'bg-primary/10 border border-primary/30' 
-                        : 'bg-muted/50 hover:bg-muted'
+                        ? 'bg-gradient-to-r from-red-500/10 to-pink-500/10 border border-red-500/30 shadow-lg' 
+                        : 'bg-muted/50 hover:bg-muted border border-transparent'
                     }`}
                   >
-                    <img
-                      src={drama.poster_url}
-                      alt={drama.title}
-                      className="w-20 h-28 object-cover rounded-lg"
-                    />
+                    <div className="relative">
+                      <img
+                        src={drama.poster_url}
+                        alt={drama.title}
+                        className="w-20 h-28 object-cover rounded-lg"
+                      />
+                      {idx === activeFeatured && (
+                        <div className="absolute inset-0 rounded-lg ring-2 ring-red-500 ring-offset-2 ring-offset-background" />
+                      )}
+                    </div>
                     <div className="flex-1 flex flex-col justify-center">
-                      <h3 className="font-semibold text-foreground line-clamp-1">{drama.title}</h3>
+                      <h3 className={`font-semibold line-clamp-1 transition-colors ${
+                        idx === activeFeatured ? 'text-red-500' : 'text-foreground'
+                      }`}>
+                        {drama.title}
+                      </h3>
                       <p className="text-xs text-muted-foreground line-clamp-2 mt-1">
                         {drama.description}
                       </p>
