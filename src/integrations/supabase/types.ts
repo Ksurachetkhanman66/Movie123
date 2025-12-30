@@ -14,6 +14,57 @@ export type Database = {
   }
   public: {
     Tables: {
+      dramas: {
+        Row: {
+          category: string[] | null
+          created_at: string
+          description: string | null
+          episodes: number | null
+          id: string
+          is_featured: boolean | null
+          poster_url: string
+          rating: number | null
+          section: string | null
+          title: string
+          title_en: string | null
+          updated_at: string
+          view_count: number | null
+          year: number | null
+        }
+        Insert: {
+          category?: string[] | null
+          created_at?: string
+          description?: string | null
+          episodes?: number | null
+          id?: string
+          is_featured?: boolean | null
+          poster_url: string
+          rating?: number | null
+          section?: string | null
+          title: string
+          title_en?: string | null
+          updated_at?: string
+          view_count?: number | null
+          year?: number | null
+        }
+        Update: {
+          category?: string[] | null
+          created_at?: string
+          description?: string | null
+          episodes?: number | null
+          id?: string
+          is_featured?: boolean | null
+          poster_url?: string
+          rating?: number | null
+          section?: string | null
+          title?: string
+          title_en?: string | null
+          updated_at?: string
+          view_count?: number | null
+          year?: number | null
+        }
+        Relationships: []
+      }
       items: {
         Row: {
           category: string | null
