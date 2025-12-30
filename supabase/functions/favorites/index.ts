@@ -15,28 +15,31 @@ serve(async (req: Request) => {
   try {
     // Get auth header for user authentication
     const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      return new Response(
-        JSON.stringify({ success: false, error: 'Missing authorization header' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
+    
+    // Create Supabase client with service role for database operations
+    const supabaseAdmin = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
 
+    // Create client with user's auth token for getting user info
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      { global: { headers: { Authorization: authHeader } } }
+      { global: { headers: { Authorization: authHeader || '' } } }
     );
 
     // Get user from auth
     const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
     if (userError || !user) {
-      console.error('Auth error:', userError);
+      console.error('Auth error:', userError?.message || 'No user found');
       return new Response(
-        JSON.stringify({ success: false, error: 'Unauthorized' }),
+        JSON.stringify({ success: false, error: 'Unauthorized - Please log in' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+
+    console.log(`User authenticated: ${user.id}`);
 
     const url = new URL(req.url);
     
@@ -54,6 +57,8 @@ serve(async (req: Request) => {
     const action = bodyParams.action || req.method;
     const dramaId = url.searchParams.get('drama_id') || bodyParams.drama_id;
 
+    console.log(`Action: ${action}, Drama ID: ${dramaId}`);
+
     // CHECK - Check if specific drama is favorited
     if (action === 'CHECK' || (action === 'GET' && dramaId)) {
       if (!dramaId) {
@@ -63,7 +68,7 @@ serve(async (req: Request) => {
         );
       }
 
-      const { data, error } = await supabaseClient
+      const { data, error } = await supabaseAdmin
         .from('favorites')
         .select('id')
         .eq('user_id', user.id)
@@ -80,7 +85,7 @@ serve(async (req: Request) => {
 
     // LIST - Get all favorites with drama details
     if (action === 'GET' || action === 'LIST') {
-      const { data, error } = await supabaseClient
+      const { data, error } = await supabaseAdmin
         .from('favorites')
         .select('id, drama_id, created_at, dramas(*)')
         .eq('user_id', user.id)
@@ -105,7 +110,7 @@ serve(async (req: Request) => {
         );
       }
 
-      const { data, error } = await supabaseClient
+      const { data, error } = await supabaseAdmin
         .from('favorites')
         .insert({ user_id: user.id, drama_id: dramaId })
         .select()
@@ -139,7 +144,7 @@ serve(async (req: Request) => {
         );
       }
 
-      const { error } = await supabaseClient
+      const { error } = await supabaseAdmin
         .from('favorites')
         .delete()
         .eq('user_id', user.id)
